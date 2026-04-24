@@ -1,5 +1,5 @@
 const rateLimit = require('express-rate-limit');
-const RedisStore = require('rate-limit-redis');
+const { RedisStore } = require('rate-limit-redis');
 const redis = require('../config/redis');
 
 const rateLimiter = rateLimit({
@@ -12,7 +12,7 @@ const rateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({
-    sendCommand: (...args) => redis.sendCommand(args),
+    client: redis,  // ✅ version 4 mein seedha client deo
   }),
 });
 
