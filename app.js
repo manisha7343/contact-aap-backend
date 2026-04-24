@@ -1,16 +1,15 @@
 const express = require("express");
 const app = express();
-const dotenv = require("dotenv"); //a package to read .env file
+
 const connectDB = require("./config/db");
-const cors = require("cors"); //cors
 const cron = require("./cron")
-
 const rateLimiter = require("./middleware/rateLimit")
-
-
 const auth = require("./routes/authRoutes")
 const contact = require("./routes/contactRoute");
 const profile = require("./routes/userRoute");
+
+const dotenv = require("dotenv"); //a package to read .env file
+const cors = require("cors"); //cors
 
 //---------------------------------------------
 

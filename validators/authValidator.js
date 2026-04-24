@@ -45,6 +45,8 @@ const vrifyEmailOtpValidationRules = [
         .trim()
     ,
     body('otp')
+        .notEmpty().withMessage("OTP is required")
+        .bail()
         .isLength({ min:6, max:6 }).withMessage("invalid otp")
         .bail()
         .isNumeric().withMessage("invalid OTP")    
@@ -96,6 +98,7 @@ const resetPasswordValidationRuels = [
         .trim()
     ,
     body('otp')
+        .notEmpty().withMessage("OTp is required")
         .isLength({ min:6, max:6 }).withMessage("invalid otp")
         .bail()
         .isNumeric().withMessage("invalid OTP")    

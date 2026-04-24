@@ -1,4 +1,7 @@
+const { log } = require('console');
 const { createClient } = require('redis');
+require('dotenv').config();
+
 
 const redis = createClient({
   username: "default",
@@ -8,6 +11,7 @@ const redis = createClient({
     port: 16431,
   },
 });
+
 
 redis.on("error", (err) => console.log("Redis Client Error", err));
 redis.on("connect", () => console.log("Redis connected ✅"));

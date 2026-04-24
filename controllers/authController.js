@@ -8,7 +8,7 @@ require('dotenv').config()
 
 const redis = require("../config/redis")
 
-// #######################   register user  ######################
+// ####################  register user  ######################
 //OK
 const registerUser = async (req, res) => {
   try {
@@ -43,7 +43,7 @@ const registerUser = async (req, res) => {
       otp:hashedOTP
     }
 
-    //5.store user in redis - temporary
+    //5.store user in redis - temporary 🟡
     await redis.set(`register:${email}`, JSON.stringify(tempData), {EX: 120})
 
     console.log("Tempory User Stored in Redis------:", tempData);
@@ -56,7 +56,7 @@ const registerUser = async (req, res) => {
               try {
                 await sendEmail(
                   email, //to
-                  "otp for verification", //subject
+                  "This OTP is for verification in Contact app", //subject
                   `<p>Your OTP is <b>${OTP}</b></p>`, //html
                 )
                 console.log("email sent successfully to verify-Email");
@@ -65,7 +65,7 @@ const registerUser = async (req, res) => {
               } catch (err) {
                 console.log("Email send failed: ", err.message);
 
-                //Redis clean deu to email fail
+                //Redis clean deu to email fail 🟡
                 await redis.del(`register:${email}`)
 
                 return res.status(500).json({
@@ -76,10 +76,12 @@ const registerUser = async (req, res) => {
 
               //-------------------------------------------
  
+    console.log("user register")
     return res.status(201).json({
       success: true,
       message: "registered successfully! please verify your email",
     });
+
   } catch (error) {
     console.log("Error in register User : ", error);
 
@@ -96,18 +98,17 @@ const verifyEmail = async (req, res) => {
   try {
     let { email, otp } = req.body;
 
+    //1. check already verify
     const userExitsInDB = await User.findOne({email});
-    if(userExitsInDB){
+    if(userExitsInDB.isEmailVerified){
       return res.status(400).json({
         success:false,
-        message:"if this email exits otp has been sent"
+        message:"You are alrady verified!"
       })
     }
 
-    //2. Redis se data nikalo
-    const tempData = JSON.parse(await redis.get(`register:${email}`));
-
-    
+    //2. Redis se data nikalo 🟡
+    const tempData = JSON.parse(await redis.get(`register:${email}`))
     if (!tempData) {
       return res.status(400).json({
         success: false,
@@ -115,11 +116,8 @@ const verifyEmail = async (req, res) => {
       });
     }
 
-    // const parsedData = JSON.parse(tempData);
-
     // 3. OTP match karo
     const isMatch = await bcrypt.compare(otp.toString(), tempData.otp);
-
     if (!isMatch) {
       return res.status(400).json({
         success: false,
@@ -136,14 +134,22 @@ const verifyEmail = async (req, res) => {
       isEmailVerified: true,
     });
 
-    // 5. Redis clean 
+    // 5. Redis clean 🟡
     await redis.del(`register:${email}`);
 
-    return res.status(200).json({
-      success: true,
-      message: "Email verified successfully!",
-    });
-
+    if(CreateUser && CreateUser.id){
+      return res.status(200).json({
+        success: true,
+        message: "Email verified successfully!",
+    })
+    }else{
+      console.log("failed to verify Your Email :", error);
+      return res.status(500).json({
+        success:false,
+        message:"failed to verify your Email"
+      })     
+    }
+  
   } catch (error) {
     console.log("Error in verifyEmail: ", error);
     return res.status(500).json({
@@ -159,7 +165,7 @@ const resnedEmailOtp = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // 1. Redis mein data hai? - matlab register kiya tha(!registered)
+    // 1. Redis mein data hai?  🟡 - matlab register kiya tha(!registered)
     const existingData = JSON.parse(await redis.get(`register:${email}`));
 
   

@@ -13,7 +13,7 @@ const rateLimiter = rateLimit({
   legacyHeaders: false,
   store: new RedisStore({
     sendCommand: (...args) => redis.sendCommand(args),
-    prefix: "rate_limit:", // ✅ add karo
+    prefix: "rate_limit:",
 }),
 });
 
