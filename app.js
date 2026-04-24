@@ -1,0 +1,51 @@
+const express = require("express");
+const app = express();
+const dotenv = require("dotenv"); //a package to read .env file
+const connectDB = require("./config/db");
+const cors = require("cors"); //cors
+const cron = require("./cron")
+
+const rateLimiter = require("./middleware/rateLimit")
+
+
+const auth = require("./routes/authRoutes")
+const contact = require("./routes/contactRoute");
+const profile = require("./routes/userRoute");
+
+//---------------------------------------------
+
+dotenv.config(); //to read .env file content for config()
+connectDB(); //mogodb connected calles here
+
+// MIDDLEWARE ------------------------------------------
+
+app.use(cors()); // used this becaus the front port was different  
+app.use(express.json()); //to read body
+app.use(rateLimiter)
+// ROUTES ------------------------------------
+
+app.use("/api/auth", auth);
+app.use("/api/user", profile);
+app.use("/api/contacts", contact);
+
+
+//API > only a server start point
+app.get("/", (req,res)=>{
+    res.send("user manager ApI running ")
+});
+
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, ()=>{
+    console.log(`server is running on ${PORT}`)
+})
+
+
+// app.js
+// // Final URLs
+
+// /api/auth/register
+
+// /api/auth/login
+
+// /api/contacts
