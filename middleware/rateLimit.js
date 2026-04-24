@@ -12,8 +12,9 @@ const rateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({
-    client: redis,  // ✅ version 4 mein seedha client deo
-  }),
+    sendCommand: (...args) => redis.sendCommand(args),
+    prefix: "rate_limit:", // ✅ add karo
+}),
 });
 
 module.exports = rateLimiter;
