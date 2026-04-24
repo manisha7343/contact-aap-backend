@@ -5,7 +5,7 @@ const connectDB = require("./config/db");
 const cors = require("cors"); //cors
 const cron = require("./cron")
 
-const rateLimiter = require("./middleware/rateLimit")
+// const rateLimiter = require("./middleware/rateLimit")
 
 
 const auth = require("./routes/authRoutes")
@@ -21,7 +21,7 @@ connectDB(); //mogodb connected calles here
 
 app.use(cors()); // used this becaus the front port was different  
 app.use(express.json()); //to read body
-app.use(rateLimiter)
+// app.use(rateLimiter)
 // ROUTES ------------------------------------
 
 app.use("/api/auth", auth);
