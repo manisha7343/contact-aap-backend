@@ -16,25 +16,25 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    }, // <-- Yahan bracket band hona chahiye tha
+    },
 
     //------------ verify email ---------------
     isEmailVerified: {
         type: Boolean,
         default: false
     },
-    // verifyEmailOtp: {
-    //     type: String,
-    //     default: null
-    // },
-    // verifyEmailOtpExpiry: {
-    //     type: Date,
-    //     default: null
-    // },
-    // lastVerifyEmailOtpSentAt:{
-    //     type:Date,
-    //     default:null
-    // },
+    verifyEmailOtp: {
+        type: String,
+        default: null
+    },
+    verifyEmailOtpExpiry: {
+        type: Date,
+        default: null
+    },
+    lastVerifyEmailOtpSentAt:{
+        type:Date,
+        default:null
+    },
 
     //--------------- 3 failed login attempts ----------
     isBlocked: {

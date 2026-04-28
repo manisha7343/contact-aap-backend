@@ -7,6 +7,9 @@ require("dotenv").config();
 
 const getProfile = async (req, res) => {
   try {
+
+    // console.log("headres -----------", req.headers.authorization);
+    
   
     //DB - user find
     const user = await User.findById(req.user, {

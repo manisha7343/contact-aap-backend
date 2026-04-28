@@ -8,9 +8,15 @@ const {
 } = require("../controllers/userContoller");
 
 
+const {
+  preAuthRateLimiter,
+  userRateLimiter,
+} = require("../middleware/rateLimit");
+
+
 
 // ########### get  profile ###################
-router.get("/profile", auth, getProfile)
+router.get("/profile", auth, userRateLimiter, getProfile)
 
 
 // ######### update profile ###############

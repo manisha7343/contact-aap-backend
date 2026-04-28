@@ -1,3 +1,4 @@
+const { log } = require("console");
 const Contact = require("../model/contact");
 const mongoose = require("mongoose");
 
@@ -50,6 +51,57 @@ const createContact = async (req, res) => {
     });
   }
 };
+
+// const createContact = (req, res) => {
+//   const { name, phone, email, isFavorite, tags } = req.body;
+
+//   const contactData = {
+//     user: req.user,
+//     name: name,
+//     phone: phone,
+//     email: email,
+//     isFavorite: isFavorite,
+//     tags: tags || [],
+//   };
+
+//   // Contact.create() Promise return karta hai
+//   // hum .then() aur .catch() se callback jaisa behaviour banayenge
+//   Contact.create(contactData)
+//     .then(function (result) {
+
+//       // ❌ result nahi aaya
+//       if (!result || !result._id) {
+//         console.log("unable to create contact");
+//         return res.status(404).json({
+//           success: false,
+//           message: "unable to save contact",
+//         });
+//       }
+
+//       // ✅ Success
+//       console.log("contact saved successfully!", result._id);
+//       return res.status(201).json({
+//         success: true,
+//         message: "contact saved successfully!",
+//       });
+
+//     })
+//     .catch(function (error) {
+
+//       // ❌ DB error
+//       console.log("contact create error:", error);
+//       return res.status(500).json({
+//         success: false,
+//         message: "Something went wrong while creating contact. Please try again later.",
+//       });
+
+//     });
+// };
+
+
+
+
+
 
 // OK
 // GET : find #####################################################

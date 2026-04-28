@@ -8,12 +8,11 @@ require('dotenv').config()
 
 const redis = require("../config/redis")
 
-// ####################  register user  ######################
+// #######################   register user  ######################
 //OK
 const registerUser = async (req, res) => {
   try {
 
-    //1.Take req with validations
     let { first_name, last_name, email, password } = req.body;
 
 
@@ -29,44 +28,49 @@ const registerUser = async (req, res) => {
     // 3. passward hashing
     const hashedpassword = await bcrypt.hash(password, 10);
 
-    //4. generating OTP
+
+    // 4. create user
+    const result = await User.create({
+      first_name: first_name,
+      last_name: last_name,
+      email:email,
+      password: hashedpassword,
+    });
+
+    console.log(result);
+    
+    //------------ otp for email verifiction ----------------
+
+    //generating OTP
+
     const OTP = crypto.randomInt(100000, 999999);
+
+    const expiry = Date.now() + 2 * 60 * 1000;
+
     const hashedOTP = await bcrypt.hash(OTP.toString(), 10);
 
-
-    //Temporayry user data
-    const tempData = {
-      first_name,
-      last_name,
-      email,
-      password: hashedpassword,
-      otp:hashedOTP
-    }
-
-    //5.store user in redis - temporary 🟡
-    await redis.set(`register:${email}`, JSON.stringify(tempData), {EX: 120})
-
-    console.log("Tempory User Stored in Redis------:", tempData);
+    // DB save
+      result.verifyEmailOtp = hashedOTP;
+      result.verifyEmailOtpExpiry = expiry;
+      await result.save();
     
-    //------------ Register otp ----------------
-
-    
-   
               //send email ------------------
               try {
                 await sendEmail(
-                  email, //to
-                  "This OTP is for verification in Contact app", //subject
-                  `<p>Your OTP is <b>${OTP}</b></p>`, //html
+                  email,
+                  "otp for verification",
+                  `<p>Your OTP is <b>${OTP}</b></p>`,
                 )
                 console.log("email sent successfully to verify-Email");
-                // 
+                
 
               } catch (err) {
+                //email not exitsts in world delete form DB
                 console.log("Email send failed: ", err.message);
 
-                //Redis clean deu to email fail 🟡
-                await redis.del(`register:${email}`)
+                if (result && result._id) {
+                  await User.findByIdAndDelete(result._id);
+                }
 
                 return res.status(500).json({
                   success: false,
@@ -75,13 +79,11 @@ const registerUser = async (req, res) => {
               }
 
               //-------------------------------------------
- 
-    console.log("user register")
+
     return res.status(201).json({
       success: true,
       message: "registered successfully! please verify your email",
     });
-
   } catch (error) {
     console.log("Error in register User : ", error);
 
@@ -95,63 +97,70 @@ const registerUser = async (req, res) => {
 // ###################  verify email otp  ##############################
 // OK
 const verifyEmail = async (req, res) => {
+  //verify-email
+
   try {
     let { email, otp } = req.body;
-
-    //1. check already verify
-    const userExitsInDB = await User.findOne({email});
-    if(userExitsInDB.isEmailVerified){
-      return res.status(400).json({
-        success:false,
-        message:"You are alrady verified!"
-      })
-    }
-
-    //2. Redis se data nikalo 🟡
-    const tempData = JSON.parse(await redis.get(`register:${email}`))
-    if (!tempData) {
-      return res.status(400).json({
+    
+    // user existance in DB
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(404).json({
         success: false,
-        message: "OTP expired ya invalid. Please register again.",
+        message: "User not found",
       });
     }
 
-    // 3. OTP match karo
-    const isMatch = await bcrypt.compare(otp.toString(), tempData.otp);
+    //user already verified
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is already verified!",
+      });
+    }
+    
+
+    if (!user.verifyEmailOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "No OTP found. Please request a new one",
+      });
+    }
+
+    // check email OTP expiry
+    if (!user.verifyEmailOtpExpiry || user.verifyEmailOtpExpiry < Date.now()) {
+      return res.status(400).json({
+        success: false,
+        message: "Your verification OTP has expired",
+      });
+    }
+
+    // otp match
+    const isMatch = await bcrypt.compare(otp.toString(), user.verifyEmailOtp);
+
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        message: "Invalid OTP",
+        message: "Invalid otp",
       });
     }
 
-    // 4.craete user in db 
-    const CreateUser = await User.create({
-      first_name: tempData.first_name,
-      last_name: tempData.last_name,
-      email: tempData.email,
-      password: tempData.password,
-      isEmailVerified: true,
+    // clear DB values
+    user.isEmailVerified = true;
+    user.verifyEmailOtp = null;
+    user.verifyEmailOtpExpiry = null;
+    await user.save();
+
+    //response to user
+    console.log("email verified succcessfully");
+
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully! You can login now",
     });
-
-    // 5. Redis clean 🟡
-    await redis.del(`register:${email}`);
-
-    if(CreateUser && CreateUser.id){
-      return res.status(200).json({
-        success: true,
-        message: "Email verified successfully!",
-    })
-    }else{
-      console.log("failed to verify Your Email :", error);
-      return res.status(500).json({
-        success:false,
-        message:"failed to verify your Email"
-      })     
-    }
-  
   } catch (error) {
-    console.log("Error in verifyEmail: ", error);
+    console.log("Error in verifying Email: ", error);
+
     return res.status(500).json({
       success: false,
       message: "failed to verify your email",
@@ -165,29 +174,34 @@ const resnedEmailOtp = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // 1. Redis mein data hai?  🟡 - matlab register kiya tha(!registered)
-    const existingData = JSON.parse(await redis.get(`register:${email}`));
-
-  
-    if (!existingData) {
+    //email check - DB
+    const user = await User.findOne({ email });
+    if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Please register first",
+        message: "if email exist, otp will sent",
       });
     }
 
-    //genrate otp
-    const OTP = crypto.randomInt(100000, 999999);
-    const hashedOtp = await bcrypt.hash(OTP.toString(), 10);
+    //already verify check
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is verified",
+      });
+    }
 
-    await redis.set(
-      `register:${email}`, 
-      JSON.stringify({
-        ...existingData,
-        otp:hashedOtp,
-      }),
-       {EX:120}
-      );
+    // alreay sent check------ (10-8 < 6)
+    if (user.lastVerifyEmailOtpSentAt && Date.now() - user.lastVerifyEmailOtpSentAt < 60000) {
+    return res.status(400).json({
+      success: false,
+      message: "Wait 60 sec before requesting new OTP",
+      });
+    }
+
+    const OTP = crypto.randomInt(100000, 999999);
+
+    const hashedOtp = await bcrypt.hash(OTP.toString(), 10);
 
      try {
              
@@ -197,15 +211,17 @@ const resnedEmailOtp = async (req, res) => {
         `<p>Your OTP is <b>${OTP}</b></p>`,
         );
 
+        user.verifyEmailOtp = hashedOtp;
+        user.verifyEmailOtpExpiry = Date.now() + 2 * 60 * 1000; //10 min
+        user.lastVerifyEmailOtpSentAt = Date.now()
+        await user.save(); 
+
         console.log("OTP SEND TO =====",email);
         
 
         } catch (err) {
           console.log("Error in sending OTP", err);
-
-          //del user from redis
-          await redis.del(`register:${email}`);
-
+          
           return res.status(500).json({
             success: false,
             message: "Failed to send verification email. Please try later",

@@ -3,13 +3,16 @@ const app = express();
 
 const connectDB = require("./config/db");
 const cron = require("./cron")
-const rateLimiter = require("./middleware/rateLimit")
+// const rateLimiter = require("./middleware/rateLimit")
 const auth = require("./routes/authRoutes")
 const contact = require("./routes/contactRoute");
 const profile = require("./routes/userRoute");
 
 const dotenv = require("dotenv"); //a package to read .env file
 const cors = require("cors"); //cors
+
+//for deplyment (render)
+app.set("trust proxy", 1);
 
 //---------------------------------------------
 
@@ -20,7 +23,7 @@ connectDB(); //mogodb connected calles here
 
 app.use(cors()); // used this becaus the front port was different  
 app.use(express.json()); //to read body
-app.use(rateLimiter)
+// app.use(rateLimiter)
 // ROUTES ------------------------------------
 
 app.use("/api/auth", auth);

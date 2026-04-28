@@ -9,35 +9,40 @@ const {
   resetPasswordValidation,
 } = require("../validators/authValidator");
 
-
 const {
   registerUser,
   verifyEmail,
   resnedEmailOtp,
-
   loginUser,
   forgetPassword,
   resetPassword,
 } = require("../controllers/authController");
 
-
-//register
-router.post("/register", registationValidation, registerUser);
-
-//verify emial
-router.post("/verify-email", verifyEmailOtpValidation, verifyEmail);
-
-//resend verify Emial otp
-router.post("/resend-email-otp", resendEmailOtpValidation, resnedEmailOtp);
-
-// user login
-router.post("/login", loginValidation, loginUser);
-
-//forget password
-router.post("/forget-password", forgetPasswordValidation, forgetPassword);
+const {
+  preAuthRateLimiter,
+  userRateLimiter,
+} = require("../middleware/rateLimit");
 
 
-//reset password
-router.post("/reset-password", resetPasswordValidation, resetPassword);
+
+
+// register
+router.post("/register", preAuthRateLimiter, registationValidation, registerUser);
+
+// verify email
+router.post("/verify-email",  preAuthRateLimiter,verifyEmailOtpValidation, verifyEmail); 
+
+// resend otp
+router.post("/resend-email-otp",  preAuthRateLimiter,resendEmailOtpValidation, resnedEmailOtp); 
+
+// login
+router.post("/login", preAuthRateLimiter, loginValidation, loginUser);
+
+// forget password
+router.post("/forget-password", preAuthRateLimiter,forgetPasswordValidation, forgetPassword);
+
+// reset password
+router.post("/reset-password", preAuthRateLimiter, resetPasswordValidation, resetPassword);
+
 
 module.exports = router;

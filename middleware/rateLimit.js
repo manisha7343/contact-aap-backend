@@ -1,20 +1,86 @@
-const rateLimit = require('express-rate-limit');
-const { RedisStore } = require('rate-limit-redis');
-const redis = require('../config/redis');
+const redisClient = require("../config/redis");
 
-const rateLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 5,
-  message: {
-    status: 429,
-    message: "Too many requests! Try after one minute."
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  store: new RedisStore({
-    sendCommand: (...args) => redis.sendCommand(args),
-    prefix: "rate_limit:",
-}),
-});
+// configs (tu easily change kar sakta hai)
+const PRE_AUTH_LIMIT = 5;     // login/register strict
+const USER_LIMIT = 7;      // normal APIs
+const WINDOW = 60;           // seconds
 
-module.exports = rateLimiter;
+// BEFORE LOGIN (IP + EMAIL)
+const preAuthRateLimiter = async (req, res, next) => {
+  try {
+    const ip = req.ip;
+    const email = req.body.email?.toLowerCase().trim();
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email required",
+      });
+    }
+
+    const key = `rate_limit:auth:${ip}:${email}`;
+
+    const count = await redisClient.incr(key);
+
+    if (count === 1) {
+      await redisClient.expire(key, WINDOW);
+    }
+
+    if (count > PRE_AUTH_LIMIT) {
+      const ttl = await redisClient.ttl(key);
+
+      return res.status(429).json({
+        success: false,
+        message: "Too many attempts, try later",
+        retryAfter: ttl,
+      });
+    }
+
+    next();
+  } catch (err) {
+    console.error("Pre-auth rate limit error:", err);
+    next();
+  }
+};
+
+// AFTER LOGIN (USER / JWT)-----------------
+const userRateLimiter = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const key = `rate_limit:user:${userId}`;
+
+    const count = await redisClient.incr(key);
+
+    if (count === 1) {
+      await redisClient.expire(key, WINDOW);
+    }
+
+    if (count > USER_LIMIT) {
+      const ttl = await redisClient.ttl(key);
+
+      return res.status(429).json({
+        success: false,
+        message: "Too many requests",
+        retryAfter: ttl,
+      });
+    }
+
+    next();
+  } catch (err) {
+    console.error("User rate limit error:", err);
+    next();
+  }
+};
+
+module.exports = {
+  preAuthRateLimiter,
+  userRateLimiter,
+};
