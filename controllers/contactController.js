@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const createContact = async (req, res) => {
   try {
     const { name, phone, email, isFavorite, tags } = req.body;
-   
+    
     //DB - create contact 🔴
 
     const contactData = {
@@ -105,6 +105,7 @@ const createContact = async (req, res) => {
 
 // OK
 // GET : find #####################################################
+
 const getContacts = async (req, res) => {
   try {
   

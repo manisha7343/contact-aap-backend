@@ -36,7 +36,7 @@ router.post("/verify-email",  preAuthRateLimiter,verifyEmailOtpValidation, verif
 router.post("/resend-email-otp",  preAuthRateLimiter,resendEmailOtpValidation, resnedEmailOtp); 
 
 // login
-router.post("/login", preAuthRateLimiter, loginValidation, loginUser);
+router.post("/login", preAuthRateLimiter, loginUser);
 
 // forget password
 router.post("/forget-password", preAuthRateLimiter,forgetPasswordValidation, forgetPassword);

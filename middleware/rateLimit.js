@@ -1,8 +1,8 @@
 const redisClient = require("../config/redis");
 
 // configs (tu easily change kar sakta hai)
-const PRE_AUTH_LIMIT = 5;     // login/register strict
-const USER_LIMIT = 7;      // normal APIs
+const PRE_AUTH_LIMIT = 100;     // login/register strict
+const USER_LIMIT = 500;      // normal APIs
 const WINDOW = 60;           // seconds
 
 // BEFORE LOGIN (IP + EMAIL)
@@ -11,7 +11,7 @@ const preAuthRateLimiter = async (req, res, next) => {
     const ip = req.ip;
     const email = req.body.email?.toLowerCase().trim();
 
-    if (!email) {
+    if (!email) { 
       return res.status(400).json({
         success: false,
         message: "Email required",
