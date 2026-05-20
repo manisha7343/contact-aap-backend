@@ -18,7 +18,9 @@
     //---------------------------------------------
 
     dotenv.config(); //to read .env file content for config()
-    connectDB(); //mogodb connected calles here
+    if (process.env.NODE_ENV !== 'test') {
+        connectDB(); //mogodb connected calles here
+    }
 
     // MIDDLEWARE ------------------------------------------
 
@@ -40,10 +42,14 @@
     });
 
 
-    const PORT = process.env.PORT || 3001;
-    app.listen(PORT, ()=>{
-        console.log(`server is running on ${PORT}`)
-    })
+    if (process.env.NODE_ENV !== 'test') {
+        const PORT = process.env.PORT || 3001;
+        app.listen(PORT, ()=>{
+            console.log(`server is running on ${PORT}`)
+        })
+    }
+
+    module.exports = app;
 
 
     // app.js
