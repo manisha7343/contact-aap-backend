@@ -61,7 +61,7 @@ const registerUser = async (req, res) => {
                   "otp for verification",
                   `<p>Your OTP is <b>${OTP}</b></p>`,
                 )
-                console.log("email sent successfully to verify-Email");
+                console.log("email sent successfully to verify-Email",email);
                 
 
               } catch (err) {

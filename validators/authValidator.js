@@ -32,7 +32,7 @@ const registationValidationRules = [
     body('password')
         .notEmpty().withMessage("password is required!")
         .bail()
-        .isStrongPassword().withMessage("Password must cbe strong!")    
+        .isStrongPassword().withMessage("Password must be strong!")    
                 
 ]
 
@@ -72,8 +72,7 @@ const loginValidationRules = [
     ,
     body('password')
         .notEmpty().withMessage("password is required!")
-        .bail()
-        .isStrongPassword().withMessage("Password must cbe strong!")    
+        .bail()    
     ,
 
 ]

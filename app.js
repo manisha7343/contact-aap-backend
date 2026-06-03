@@ -3,7 +3,7 @@
 
 
     const connectDB = require("./config/db");
-    const cron = require("./cron")
+    // const cron = require("./cron")
     // const rateLimiter = require("./middleware/rateLimit")
     const auth = require("./routes/authRoutes")
     const contact = require("./routes/contactRoute");

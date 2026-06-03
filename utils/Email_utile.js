@@ -1,27 +1,43 @@
 const nodemailer = require("nodemailer");
-require('dotenv').config()
+require('dotenv').config();
 
-// Transporter setup
 const transport = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  family: 4,              // ✅ Force IPv4 — IPv6 wala error fix hoga
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Yahan 'App Password' hona chahiye
+    pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false  // ✅ TLS certificate issue fix
+  }
 });
 
-// Reusable function
+// Connection verify karo — pata chalega issue kahan hai
+transport.verify((error, success) => {
+  if (error) {
+    console.error("❌ SMTP Connection Failed:", error.message);
+  } else {
+    console.log("✅ SMTP Connected! Ready to send emails.");
+  }
+});
+
 const sendEmail = async (to, subject, html) => {
   try {
     const info = await transport.sendMail({
-      from: process.env.EMAIL_USER,
+      from: `"Contact App" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
     });
+    console.log("✅ Email sent:", info.messageId);
+    return info;
   } catch (error) {
-    console.error("Email error:", error);
-    throw error; // Error ko upar bhej dega taaki controller use handle kar sake
+    console.error("Email error:", error.message);
+    throw error;
   }
 };
 
