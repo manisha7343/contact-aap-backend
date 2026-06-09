@@ -27,6 +27,7 @@
     app.use(cors()); // used this becaus the front port was different  
     app.use(express.json()); //to read body
     app.use(express.urlencoded({ extended: true }));
+    app.use('/uploads', express.static('uploads')); // Isse photo public ho jayegi
 
     // app.use(rateLimiter)
     // ROUTES ------------------------------------

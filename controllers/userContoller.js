@@ -16,6 +16,7 @@ const getProfile = async (req, res) => {
       first_name: 1,
       last_name: 1,
       email: 1,
+      profilePic: 1, //photo
     });
 
     // console.log("user : ", user);
@@ -51,14 +52,15 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
 
-    const {first_name, last_name } = req.body;
+    const {first_name, last_name,profilePic } = req.body;
 
     //DB
     const result = await User.updateOne({ _id: req.user }, 
       {
         $set:{
           first_name: first_name,
-          last_name: last_name
+          last_name: last_name,
+          profilePic: profilePic
         }
       }
     );
@@ -105,9 +107,37 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// ################### mutler upload ###########################
+
+const uploadProfilePic = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "Koi file select nahi ki!" });
+    }
+
+    const imagePath = req.file.path;
+
+    await User.updateOne(
+      { _id: req.user }, 
+      { $set: { profilePic: imagePath } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile picture uploaded successfully!",
+      profilePic: imagePath,
+    });
+
+  } catch (error) {
+    console.log("Error in uploading pic: ", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+// ----------------------------------------------------------
 
 module.exports = {
   getProfile,
   updateProfile,
+  uploadProfilePic
  
 };

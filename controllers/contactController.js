@@ -114,12 +114,18 @@ const getContacts = async (req, res) => {
      isDeleted:false
     }
     
+    //fav constact 
     if(req.query.isFavorite !== undefined){
        filter.isFavorite = true;
     }
 
+    //serch contatcs
+    if (req.query.search) {
+   filter.name = { $regex: req.query.search, $options: "i" };
+    }
+
     console.log("Query:", req.query.isFavorite);
-console.log("Filter:", filter);
+    console.log("Filter:", filter);
 
     //pagination----------------
 
@@ -135,7 +141,7 @@ console.log("Filter:", filter);
     const result = await Contact.find(
       filter, //specific user ka all contact
       { user: 0, __v: 0, isDeleted: 0 },
-    ).skip(skip).limit(limit); 
+    ).sort({ name: 1 }).skip(skip).limit(limit); 
 
 
     // no contacts found
@@ -144,6 +150,9 @@ console.log("Filter:", filter);
         success: true,
         message: "no contacts found",
         data: [],
+        page,
+        limit,
+        totalPages:0
       });
     } else {
       console.log("contact fetched successfully");
@@ -255,7 +264,7 @@ const updateContact = async (req, res) => {
 
     //DB - upadate contact🔴
     const result = await Contact.updateOne(
-      { _id: contactId, user: req.user, isDeleted:false }, // filter
+      { _id: contactId, user: req.user}, // filter
       { 
         $set: 
           query

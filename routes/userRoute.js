@@ -5,23 +5,26 @@ const {UpdateUserValdation} = require("../validators/userValidator")
 const { 
     getProfile,  
     updateProfile,
+    uploadProfilePic
 } = require("../controllers/userContoller");
-
 
 const {
   preAuthRateLimiter,
   userRateLimiter,
 } = require("../middleware/rateLimit");
 
+const uploadProfilePicMiddleware = require("../middleware/uploadMiddleware"); //mutler
 
 
-// ########### get  profile ###################
+// ########### get  profile #############################################
 router.get("/profile", auth, userRateLimiter, getProfile)
 
 
 // ######### update profile ###############
 router.put("/profile/:id", auth, UpdateUserValdation, updateProfile)
 
+//########## mutler upload route ##############
+// NAYAA ROUTE YAHAN BANA DIYA
+router.post("/upload-profile-pic", auth, userRateLimiter, uploadProfilePicMiddleware, uploadProfilePic);
 
-
-module.exports = router;
+module.exports = router;  

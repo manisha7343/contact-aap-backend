@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
         unique: true,
         index: true  
     },
+    profilePic: {
+    type: String,
+    default: "" // Shuruat me khali rahega jab tak user khud upload na kare
+    },
     password: {
         type: String,
         required: true
