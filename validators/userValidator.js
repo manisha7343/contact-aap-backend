@@ -20,14 +20,7 @@ const UpdateUserValidationRules = [
         .bail()
         .isLength({ min:2, max:14}).withMessage('lastName must be a string')
         .trim()
-    ,
     
-    body().custom(( _ , { req }) => {
-    if (Object.keys(req.body).length === 0) {
-        throw new Error("At least one field is required to update");
-    }
-    return true;
-    })
 
 ]
 

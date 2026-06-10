@@ -21,9 +21,9 @@ router.get("/profile", auth, userRateLimiter, getProfile)
 
 
 // ######### update profile ###############
-router.put("/profile/:id", auth, UpdateUserValdation, updateProfile)
+router.put("/profile", auth, UpdateUserValdation, updateProfile)
 
-//########## mutler upload route ##############
+//########## multer upload route ##############
 // NAYAA ROUTE YAHAN BANA DIYA
 router.post("/upload-profile-pic", auth, userRateLimiter, uploadProfilePicMiddleware, uploadProfilePic);
 
