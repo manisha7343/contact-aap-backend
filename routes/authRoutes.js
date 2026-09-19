@@ -18,31 +18,31 @@ const {
   resetPassword,
 } = require("../controllers/authController");
 
-const {
-  preAuthRateLimiter,
-  userRateLimiter,
-} = require("../middleware/rateLimit");
+// const {
+//   preAuthRateLimiter,
+//   userRateLimiter,
+// } = require("../middleware/rateLimit");
 
 
 
 
 // register
-router.post("/register", preAuthRateLimiter, registationValidation, registerUser);
+router.post("/register", registationValidation, registerUser);
 
 // verify email
-router.post("/verify-email",  preAuthRateLimiter,verifyEmailOtpValidation, verifyEmail); 
+router.post("/verify-email", verifyEmailOtpValidation, verifyEmail); 
 
 // resend otp
-router.post("/resend-email-otp",  preAuthRateLimiter,resendEmailOtpValidation, resnedEmailOtp); 
+router.post("/resend-email-otp", resendEmailOtpValidation, resnedEmailOtp); 
 
 // login
-router.post("/login", preAuthRateLimiter, loginUser);
+router.post("/login", loginUser);
 
 // forget password
-router.post("/forget-password", preAuthRateLimiter,forgetPasswordValidation, forgetPassword);
+router.post("/forget-password", forgetPasswordValidation, forgetPassword);
 
 // reset password
-router.post("/reset-password", preAuthRateLimiter, resetPasswordValidation, resetPassword);
+router.post("/reset-password", resetPasswordValidation, resetPassword);
 
 
 module.exports = router;

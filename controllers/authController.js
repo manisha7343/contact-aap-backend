@@ -9,6 +9,10 @@ require('dotenv').config()
 const redis = require("../config/redis")
 
 // #######################   register user  ######################
+
+
+
+
 //OK
 const registerUser = async (req, res) => {
   try {
@@ -519,13 +523,13 @@ module.exports = {
 
 // 2...user find karo by email (Db me)
 
-// 3...agar user nahi â†’ "user not found"
+// 3...agar user nahi â  "user not found"
 
 // 4...bcrypt.compare(password, user.password)
 
-// 5...agar false â†’ invalid user or passward
+// 5...agar false â  invalid user or passward
 
-// 6...agar true â†’JWT token generate
+// 6...agar true â JWT token generate
 
 // 7...respose me token bhejo
 

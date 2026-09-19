@@ -8,23 +8,23 @@ const {
     uploadProfilePic
 } = require("../controllers/userContoller");
 
-const {
-  preAuthRateLimiter,
-  userRateLimiter,
-} = require("../middleware/rateLimit");
+// const {
+//   preAuthRateLimiter,
+//   userRateLimiter,
+// } = require("../middleware/rateLimit");
 
 const uploadProfilePicMiddleware = require("../middleware/uploadMiddleware"); //mutler
 
 
 // ########### get  profile #############################################
-router.get("/profile", auth, userRateLimiter, getProfile)
+router.get("/profile", auth, getProfile)
 
 
 // ######### update profile ###############
-router.put("/profile", auth, UpdateUserValdation, updateProfile)
+router.put("/profile", auth, updateProfile)
 
 //########## multer upload route ##############
 // NAYAA ROUTE YAHAN BANA DIYA
-router.post("/upload-profile-pic", auth, userRateLimiter, uploadProfilePicMiddleware, uploadProfilePic);
+router.post("/upload-profile-pic", auth, uploadProfilePicMiddleware, uploadProfilePic);
 
 module.exports = router;  
